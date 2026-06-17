@@ -54,3 +54,27 @@ CREATE TABLE goals (
         REFERENCES categories (id)
         ON DELETE RESTRICT
 );
+
+CREATE INDEX goals_user_status_index
+ON Goals (
+    user_id,
+    status
+);
+
+CREATE TABLE goal_progress_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_id INTEGER NOT NULL,
+    previous_value REAL NOT NULL CHECK (previous_value >=0),
+    new_value REAL NOT NULL CHECK (new_value >=0),
+    recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (goal_id)
+        REFERENCES goals (id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX goal_progress_goal_index
+ON goal_progress_history (
+    goal_id,
+    recorded_at
+);
