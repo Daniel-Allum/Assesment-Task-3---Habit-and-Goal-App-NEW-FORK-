@@ -24,3 +24,33 @@ CREATE TABLE categories (
         REFERENCES users (id)
         ON DELETE CASCADE
 );
+
+CREATE UNIQUE INDEX categories_user_name_unique 
+ON categories (
+    user_id,
+    name COLLATE NOCASE
+);
+
+CREATE TABLE goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    category_id INTEGER,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    is_high_priority INTEGER NOT NULL DEFAULT 0 CHECK (is_high_priority IN (0, 1)),
+    deadline DATE,
+    target_value REAL NOT NULL CHECK (target_value > 0),
+    current_progress REAL NOT NULL DEFAULT 0 CHECK (current_progress >= 0),
+    unit TEXT NOT NULL DEFAULT 'units',
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    completed_at TIMESTAMP,
+
+    FOREIGN KEY (user_id) 
+        REFERENCES users (id) 
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (category_id)
+        REFERENCES categories (id)
+        ON DELETE RESTRICT
+);
