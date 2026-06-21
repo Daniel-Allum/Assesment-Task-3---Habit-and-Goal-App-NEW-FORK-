@@ -118,3 +118,55 @@ def login():
             return redirect(url_for("dashboard.index"))
 
     return render_template("auth/login.html")
+
+
+@bp.before_app_request
+def load_logged_in_user():
+    """Load the current user before every request."""
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = (
+            get_db()
+            .execute(
+                """
+            SELECT
+                id,
+                username,
+                created_at
+            FROM users
+            WHERE id = ?
+            """,
+                (user_id,),
+            )
+            .fetchone()
+        )
+
+
+@bp.post("/logout")
+def logout():
+    """Remove the current login session."""
+
+    session.clear()
+
+    return redirect(url_for("auth.login"))
+
+
+def login_required(view):
+    """Prevent signed-out users from accessing a route."""
+
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            flash(
+                "Please log in to access that page.",
+                "error",
+            )
+
+            return redirect(url_for("auth.login"))
+
+        return view(**kwargs)
+
+    return wrapped_view
