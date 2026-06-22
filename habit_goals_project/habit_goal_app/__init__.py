@@ -30,8 +30,10 @@ def create_app(test_config=None):
 
     from . import auth
     from . import dashboard
+    from . import categories
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(dashboard.bp)
+    app.register_blueprint(categories.bp)
 
     return app

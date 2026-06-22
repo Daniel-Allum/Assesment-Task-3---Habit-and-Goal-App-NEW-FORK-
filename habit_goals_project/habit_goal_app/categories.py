@@ -96,3 +96,70 @@ def create():
         page_title="Create Category",
         category=None,
     )
+
+
+@bp.route("/<int:category_id>/update", methods=("GET", "POST"))
+@login_required
+def update(category_id):
+    """Rename an existing category"""
+    category = get_category(category_id)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        error = None
+
+        if not name:
+            error = "Category name is required."
+        elif len(name) > 40:
+            error = "Category name must contain no more than 40 characters."
+
+        if error is None:
+            db = get_db()
+
+            try:
+                db.execute(
+                    "UPDATE categories SET name = ? WHERE id = ? AND user_id = ?",
+                    (name, category_id, g.user["id"]),
+                )
+                db.commit()
+            except sqlite3.IntegrityError:
+                db.rollback()
+                error = "You already have a category with that name."
+            else:
+                flash("Category updated successfully.", "success")
+                return redirect(url_for("categories.index"))
+        flash(error, "error")
+
+    return render_template(
+        "categories/form.html",
+        page_title="Rename Category",
+        category=category,
+    )
+
+
+@bp.post("/<int:category_id>/delete")
+@login_required
+def delete(category_id):
+    """Delete an unused category."""
+
+    get_category(category_id)
+    db = get_db()
+
+    try:
+        db.execute(
+            "DELETE FROM categories WHERE id = ? AND user_id = ?",
+            (category_id, g.user["id"]),
+        )
+        db.commit()
+
+    except sqlite3.IntegrityError:
+        db.rollback()
+        flash(
+            "This category cannot be deleted because it is assigned to a goal or habit.",
+            "error",
+        )
+
+    else:
+        flash("Category deleted successfully.", "success")
+
+    return redirect(url_for("categories.index"))
