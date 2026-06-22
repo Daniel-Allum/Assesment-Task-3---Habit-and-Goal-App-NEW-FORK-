@@ -75,17 +75,24 @@ def create():
         elif len(name) > 40:
             error = "Category name must contain no more than 40 characters."
 
-            if error is None:
-                db = get_db()
+        if error is None:
+            db = get_db()
 
-                try:
-                    db.execute(
-                        "INSERT INTO categories (user_id, name) VALUES (?, ?)",
-                        (g.user["id"], name),
-                    )
-                    db.commit()
-                except sqlite3.IntegrityError:
-                    error = "You already have a category with that name."
-                else:
-                    flash("Category created successfully.", "Success")
-                    return redirect(url_for("categories.index"))
+            try:
+                db.execute(
+                    "INSERT INTO categories (user_id, name) VALUES (?, ?)",
+                    (g.user["id"], name),
+                )
+                db.commit()
+            except sqlite3.IntegrityError:
+                error = "You already have a category with that name."
+            else:
+                flash("Category created successfully.", "Success")
+                return redirect(url_for("categories.index"))
+        flash(error, "error")
+
+    return render_template(
+        "categories/form.html",
+        page_title="Create Category",
+        category=None,
+    )
