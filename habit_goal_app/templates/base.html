@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+            Habits and Goals
+        {% endblock %}
+    </title>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <a href="{{ url_for('dashboard.index') }}"> Habits and Goals </a>
+        </h1>
+        <nav>
+            {% if g.user %}
+                <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+                <a href="{{ url_for('categories.index') }}">Categories</a>
+                <a href="{{ url_for('goals.index') }}">Goals</a>
+                <a href="{{ url_for('habits.index') }}">Habits</a>
+                <span>Logged in as {{ g.user["username"] }}</span>
+                <form
+                    action="{{ url_for('auth.logout') }}"
+                    method="post"
+                    style="display: inline;">
+                
+                    <button type="submit">
+                        Log out
+                    </button>
+                </form>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}">Sign up</a>
+                <a href="{{ url_for('auth.login') }}">Log in</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <hr>
+    <main>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <p>
+                <strong>{{ category|title }}:</strong>
+                {{ message }}
+            </p>
+        {% endfor %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
