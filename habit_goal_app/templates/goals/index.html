@@ -1,0 +1,43 @@
+{% extends "base.html" %} {% block title %} Goals | Habits and Goals {% endblock
+%} {% block content %}
+<h2>Goals</h2>
+
+<p>
+  This page will later allow users to create, view, update and complete detailed
+  goals.
+</p>
+
+{% if goals %}
+<ul>
+  {% for goal in goals %}
+  <li>
+    <strong>{{ goal["name"] }}</strong>
+
+    {% if goal["is_high_priority"] %} - High Priority {% endif %}
+
+    <br />
+
+    Category: {{ goal["category_name"] if goal["category_name"] else "No
+    category" }}
+
+    <br />
+
+    Progress: {{ goal["current_progress"] }} / {{ goal["target_value"] }} {{
+    goal["unit"] }}
+
+    <br />
+
+    Percentage: {{ "%.1f"|format( (goal["current_progress"] /
+    goal["target_value"]) * 100 ) }}%
+
+    <br />
+
+    Status: {{ goal["status"] }} {% if goal["deadline"] %}
+    <br />
+    Deadline: {{ goal["deadline"] }} {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No goals have been created yet.</p>
+{% endif %} {% endblock %}
