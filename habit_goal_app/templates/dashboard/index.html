@@ -1,89 +1,69 @@
 {% extends "base.html" %} {% block title %} Dashboard | Habits and Goals {%
 endblock %} {% block content %}
 
-    <h2>Welcome, {{g.user["username"]}}</h2>
-    <p>
-        This dashboard will summarise your highest priority goals, strongest habits
-        and overall progress.
-    </p>
-    <h3>Account Summary</h3>
+<h2>Welcome {{ g.user.username }}</h2>
+<p>
+  This dashboard will summarise your highest priority goals, strongest habits
+  and overall progress.
+</p>
+<h3>Account Summary</h3>
 
-    <ul>
-        <li>Active goals: {{ counts.active_goals }}</li>
-        <li>Completed goals: {{ counts.completed_goals }}</li>
-        <li>Active habits: {{ counts.active_habits }}</li>
-        <li>Categories: {{ counts.categories }}</li>
-    </ul>
-
-    <h3>Top Goals</h3>
-    {% if top_goals %}
-        <ul>
-            {% for goal in top_goals %}
-                <li>
-                    <strong>{{ goal["name] }}</strong>
-                    {% if goal.is_high_priority %} - High Priority {% endif %}
-                    <br>
-                    Progress: {{ goal["current_progress"] }} / {{ goal["target_value"] }} {{
-                    goal["unit"] }}
-                    <br>
-
-                    Percentage:
-                    {{
-                        "%.1f"|format(
-                            (goal["current_progress"] / goal["target_value"]) * 100
-                        )
-                    }}%
-
-                    {% if goal["deadline"] %}
-                        <br>
-                        Deadline:
-                        {{ goal["deadline"] }}
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>
-            No goals have been created yet.
-        </p>
-    {% endif %}
-
-    <h3>Top Habits</h3>
-
-    {% if top_habits %}
-        <ul>
-            {% for habit in top_habits %}
-                <li>
-                    <strong>{{ habit["name"] }}</strong>
-
-                    <br>
-
-                    Frequency:
-                    {{ habit["frequency"] }}
-
-                    <br>
-
-                    Current streak:
-                    {{ habit["current_streak"] }}
-
-                    <br>
-
-                    Longest streak:
-                    {{ habit["longest_streak"] }}
-
-                    <br>
-
-                    Target:
-                    {{ habit["target_amount"] }}
-                    {{ habit["unit"] }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>
-            No habits have been created yet.
-        </p>
-    {% endif %}
-{% endblock %}
-    </li>
+<ul>
+  <li>Active goals: {{ counts.active_goals }}</li>
+  <li>Completed goals: {{ counts.completed_goals }}</li>
+  <li>Active habits: {{ counts.active_habits }}</li>
+  <li>Categories: {{ counts.categories }}</li>
 </ul>
+
+<h3>Top Goals</h3>
+{% if top_goals %}
+<ul>
+  {% for goal in top_goals %}
+  <li>
+    <strong>{{ goal.name }}</strong>
+    {% if goal.is_high_priority %} - High Priority {% endif %}
+    <br />
+    Progress: {{ goal.current_progress }} / {{ goal.target_value }} {{ goal.unit
+    }}
+    <br />
+
+    Percentage: {{ "%.1f"|format( (goal.current_progress / goal.target_value) *
+    100 ) }}% {% if goal.deadline %}
+    <br />
+    Deadline: {{ goal.deadline }} {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No goals have been created yet.</p>
+{% endif %}
+
+<h3>Top Habits</h3>
+
+{% if top_habits %}
+<ul>
+  {% for habit in top_habits %}
+  <li>
+    <strong>{{ habit.name }}</strong>
+
+    <br />
+
+    Frequency: {{ habit.frequency }}
+
+    <br />
+
+    Current streak: {{ habit.current_streak }}
+
+    <br />
+
+    Longest streak: {{ habit.longest_streak }}
+
+    <br />
+
+    Target: {{ habit.target_amount }} {{ habit.unit }}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No habits have been created yet.</p>
+{% endif %} {% endblock %}
