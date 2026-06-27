@@ -337,3 +337,99 @@ def update(goal_id):
         flash(error, "error")
 
     return render_template("goals/update.html", goal=goal, categories=categories)
+
+
+@bp.post("/<int:goal_id>/progress")
+@login_required
+def set_progress(goal_id):
+    """Set the current progress value for a goal."""
+    goal = get_goal(goal_id)
+
+    if goal["status"] == "completed":
+        flash("Completed goals cannot be updated.", "error")
+        return redirect(url_for("goals.details", goal_id=goal_id))
+    new_progress_raw = request.form.get("current_progress", "").strip()
+    error = None
+    try:
+        new_progress = float(new_progress_raw)
+    except ValueError:
+        error = "Progress must be a number."
+
+    if error is None and new_progress < 0:
+        error = "Progress cannot be negative."
+
+    if error is not None:
+        flash(error, "error")
+        return redirect(url_for("goals.details", goal_id=goal_id))
+
+    previous_progress = goal["current_progress"]
+    status = "completed" if new_progress >= goal["target_value"] else "active"
+    completed_at = (
+        datetime.now().replace(microsecond=0) if status == "completed" else None
+    )
+    db = get_db()
+    db.execute(
+        "UPDATE goals SET current_progress = ?, status = ?, completed_at = ? WHERE id = ? AND user_id = ?",
+        (new_progress, status, completed_at, goal_id, g.user["id"]),
+    )
+
+    if previous_progress != new_progress:
+        db.execute(
+            "INSERT INTO goal_progress_history (goal_id, previous_value, new_value) VALUES (?, ?, ?)",
+            (goal_id, previous_progress, new_progress),
+        )
+    db.commit()
+
+    if status == "completed":
+        flash(
+            "Goal progress reached the target and was marked as completed.", "success"
+        )
+        return redirect(url_for("goals.completed"))
+    flash("Goal progress updated successfully.", "success")
+    return redirect(url_for("goals.details", goal_id=goal_id))
+
+
+@bp.post("/<int:goal_id>/complete")
+@login_required
+def complete(goal_id):
+    """Manually mark a goal as completed."""
+    goal = get_goal(goal_id)
+    if goal["status"] == "completed":
+        flash("This goal is already completed.", "error")
+        return redirect(url_for("goals.details", goal_id=goal_id))
+    previous_progress = goal["current_progress"]
+    completed_progress = max(goal["current_progress"], goal["target_value"])
+    db = get_db()
+
+    db.execute(
+        "UPDATE goals SET current_progress = ?, status = 'completed', completed_at = ? WHERE id = ? AND user_id = ?",
+        (
+            completed_progress,
+            datetime.now().replace(microsecond=0),
+            goal_id,
+            g.user["id"],
+        ),
+    )
+
+    if previous_progress != completed_progress:
+        db.execute(
+            "INSERT INTO goal_progress_history (goal_id, previous_value, new_value) VALUES (?, ?, ?)",
+            (goal_id, previous_progress, completed_progress),
+        )
+    db.commit()
+    flash("Goal marked as completed.", "success")
+    return redirect(url_for("goals.completed"))
+
+
+@bp.post("/<int:goal_id>/delete")
+@login_required
+def delete(goal_id):
+    """Delete a goal owned by the current user."""
+    get_goal(goal_id)
+    get_db().execute(
+        "DELETE FROM goals WHERE id = ? AND user_id = ?",
+        (goal_id, g.user["id"]),
+    )
+    get_db().commit()
+    flash("Goal deleted successfully.", "success")
+    return redirect(url_for("goals.index"))
