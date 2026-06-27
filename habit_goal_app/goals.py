@@ -23,7 +23,6 @@ bp = Blueprint(
 
 def get_goal(goal_id):
     """Retrieve one goal owned by the current user."""
-
     goal = (
         get_db()
         .execute(
@@ -59,7 +58,6 @@ def get_user_categories():
 
 def category_belongs_to_user(category_id):
     """Check whether a category belongs to the current user."""
-
     category = (
         get_db()
         .execute(
@@ -68,7 +66,6 @@ def category_belongs_to_user(category_id):
         )
         .fetchone()
     )
-
     return category is not None
 
 
@@ -76,7 +73,6 @@ def category_belongs_to_user(category_id):
 @login_required
 def index():
     """Display goals belonging to the current user."""
-
     goals = (
         get_db()
         .execute(
@@ -102,7 +98,6 @@ def index():
 @login_required
 def completed():
     """Display completed goals belonging to the current user."""
-
     goals = (
         get_db()
         .execute(
@@ -126,7 +121,6 @@ def completed():
 @login_required
 def create():
     """Create a new goal."""
-
     categories = get_user_categories()
 
     if not categories:
@@ -216,7 +210,6 @@ def create():
                     completed_at,
                 ),
             )
-
             goal_id = cursor.lastrowid
 
             if current_progress > 0:
@@ -224,11 +217,123 @@ def create():
                     "INSERT INTO goal_progress_history (goal_id, previous_value, new_value) VALUES (?, ?, ?)",
                     (goal_id, 0, current_progress),
                 )
-
             db.commit()
             flash("Goal created successfully.", "success")
             return redirect(url_for("goals.details", goal_id=goal_id))
-
         flash(error, "error")
 
     return render_template("goals/create.html", categories=categories)
+
+
+@bp.route("/<int:goal_id>")
+@login_required
+def details(goal_id):
+    """Display one individual goal."""
+    goal = get_goal(goal_id)
+    progress_history = (
+        get_db()
+        .execute(
+            "SELECT previous_value, new_value, recorded_at FROM goal_progress_history WHERE goal_id = ? ORDER BY recorded_at DESC",
+            (goal_id,),
+        )
+        .fetchall()
+    )
+
+    return render_template(
+        "goals/details.html", goal=goal, progress_history=progress_history
+    )
+
+
+@bp.route("/<int:goal_id>/update", methods=("GET", "POST"))
+@login_required
+def update(goal_id):
+    """Update goal details, excluding progress."""
+    goal = get_goal(goal_id)
+    categories = get_user_categories()
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        description = request.form.get("description", "").strip()
+        category_id_raw = request.form.get("category_id", "").strip()
+        deadline = request.form.get("deadline", "").strip()
+        target_value_raw = request.form.get("target_value", "").strip()
+        unit = request.form.get("unit", "").strip()
+        is_high_priority = 1 if request.form.get("is_high_priority") else 0
+
+        error = None
+        category_id = None
+        target_value = None
+
+        if not name:
+            error = "Goal name is required."
+        elif len(name) > 80:
+            error = "Goal name must contain no more than 80 characters."
+        elif not category_id_raw:
+            error = "Category is required."
+        else:
+            try:
+                category_id = int(category_id_raw)
+            except ValueError:
+                error = "Invalid category selected."
+
+        if error is None and not category_belongs_to_user(category_id):
+            error = "Invalid category selected."
+
+        if error is None:
+            try:
+                target_value = float(target_value_raw)
+            except ValueError:
+                error = "Target value must be a number."
+
+        if error is None and target_value <= 0:
+            error = "Target value must be greater than 0."
+
+        if error is None and not unit:
+            error = "Unit is required."
+
+        if error is None and len(unit) > 20:
+            error = "Unit must contain no more than 20 characters."
+
+        if error is None and deadline:
+            try:
+                datetime.strptime(deadline, "%Y-%m-%d")
+            except ValueError:
+                error = "Deadline must be a valid date."
+
+        if error is None:
+            current_progress = goal["current_progress"]
+            should_complete = (
+                current_progress >= target_value or goal["status"] == "completed"
+            )
+            status = "completed" if should_complete else "active"
+            completed_at = goal["completed_at"]
+
+            if should_complete and completed_at is None:
+                completed_at = datetime.now().replace(microsecond=0)
+            db = get_db()
+            db.execute(
+                """
+                UPDATE goals SET category_id = ?, name = ?, description = ?, is_high_priority = ?, deadline = ?, target_value = ?, unit = ?, status = ?, completed_at = ?
+                WHERE id = ? AND user_id = ?
+                """,
+                (
+                    category_id,
+                    name,
+                    description,
+                    is_high_priority,
+                    deadline if deadline else None,
+                    target_value,
+                    unit,
+                    status,
+                    completed_at,
+                    goal_id,
+                    g.user["id"],
+                ),
+            )
+
+            db.commit()
+            flash("Goal updated successfully.", "success")
+            return redirect(url_for("goals.details", goal_id=goal_id))
+        flash(error, "error")
+
+    return render_template("goals/update.html", goal=goal, categories=categories)
