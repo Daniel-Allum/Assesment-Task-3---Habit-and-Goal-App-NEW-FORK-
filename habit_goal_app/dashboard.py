@@ -43,7 +43,7 @@ def index():
         """
         SELECT goals.id, goals.name, goals.current_progress, goals.target_value, goals.unit, goals.deadline, goals.is_high_priority, categories.name AS category_name
         FROM goals
-        LEFT JOIN categories ON categories.id = goals.categories_id
+        LEFT JOIN categories ON categories.id = goals.category_id
         WHERE goals.user_id = ? AND goals.status = 'active'
         ORDER BY goals.is_high_priority DESC, CASE WHEN goals.deadline IS NULL THEN 1 ELSE 0 END, goals.deadline ASC, goals.created_at DESC
         LIMIT 3

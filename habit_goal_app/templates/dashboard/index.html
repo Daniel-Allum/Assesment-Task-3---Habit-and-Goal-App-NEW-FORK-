@@ -9,10 +9,10 @@ endblock %} {% block content %}
     <h3>Account Summary</h3>
 
     <ul>
-        <li>Active goals: {{ counts["active_goals"] }}</li>
-        <li>Completed goals: {{ counts["completed_goals"] }}</li>
-        <li>Active habits: {{ counts["active_habits"] }}</li>
-        <li>Categories: {{ counts["categories"] }}</li>
+        <li>Active goals: {{ counts.active_goals }}</li>
+        <li>Completed goals: {{ counts.completed_goals }}</li>
+        <li>Active habits: {{ counts.active_habits }}</li>
+        <li>Categories: {{ counts.categories }}</li>
     </ul>
 
     <h3>Top Goals</h3>
@@ -21,7 +21,7 @@ endblock %} {% block content %}
             {% for goal in top_goals %}
                 <li>
                     <strong>{{ goal["name] }}</strong>
-                    {% if goal["is_high_priority"] %} - High Priority {% endif %}
+                    {% if goal.is_high_priority %} - High Priority {% endif %}
                     <br>
                     Progress: {{ goal["current_progress"] }} / {{ goal["target_value"] }} {{
                     goal["unit"] }}
