@@ -1,0 +1,90 @@
+{% extends "base.html" %} {% block title %} Create Goal | Habits and Goals {%
+endblock %} {% block content %}
+
+<h2>Create Goal</h2>
+
+<form method="post">
+  <p>
+    <label for="name">Goal Name</label>
+    <br />
+    <input type="text" id="name" name="name" required maxlength="80" />
+  </p>
+
+  <p>
+    <label for="description">Description</label>
+    <br />
+    <textarea id="description" name="description" rows="4"></textarea>
+  </p>
+
+  <p>
+    <label for="category_id">Category</label>
+    <br />
+    <select id="category_id" name="category_id" required>
+      <option value="">Select a category</option>
+
+      {% for category in categories %}
+      <option value="{{ category.id }}">{{ category.name }}</option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label>
+      <input type="checkbox" name="is_high_priority" />
+      High Priority
+    </label>
+  </p>
+
+  <p>
+    <label for="deadline">Deadline Optional</label>
+    <br />
+    <input type="date" id="deadline" name="deadline" />
+  </p>
+
+  <p>
+    <label for="target_value">Target Value</label>
+    <br />
+    <input
+      type="number"
+      id="target_value"
+      name="target_value"
+      required
+      min="0.01"
+      step="0.01"
+    />
+  </p>
+
+  <p>
+    <label for="current_progress">Current Progress</label>
+    <br />
+    <input
+      type="number"
+      id="current_progress"
+      name="current_progress"
+      required
+      min="0"
+      step="0.01"
+      value="0"
+    />
+  </p>
+
+  <p>
+    <label for="unit">Unit</label>
+    <br />
+    <input
+      type="text"
+      id="unit"
+      name="unit"
+      required
+      maxlength="20"
+      placeholder="hours, books, dollars, kilometers"
+    />
+  </p>
+
+  <button type="submit">Create Goal</button>
+</form>
+
+<p>
+  <a href="{{ url_for('goals.index') }}"> Back to Goals </a>
+</p>
+{% endblock %}
