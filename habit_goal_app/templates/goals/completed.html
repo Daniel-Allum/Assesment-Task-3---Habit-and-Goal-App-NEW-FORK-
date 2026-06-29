@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Completed Goals | Habits and Goals
+{% endblock %}
+
+{% block content %}
+    <h2>Completed Goals</h2>
+
+    <p>
+        This page stores goals that have been completed.
+    </p>
+
+    <p>
+        <a href="{{ url_for('goals.index') }}">
+            Back to Active Goals
+        </a>
+    </p>
+
+    {% if goals %}
+        <ul>
+            {% for goal in goals %}
+                <li>
+                    <strong>
+                        <a href="{{ url_for('goals.details', goal_id=goal.id) }}">
+                            {{ goal.name }}
+                        </a>
+                    </strong>
+
+                    {% if goal.is_high_priority %}
+                        - High Priority
+                    {% endif %}
+
+                    <br>
+
+                    Category:
+                    {{ goal.category_name if goal.category_name else "No category" }}
+
+                    <br>
+
+                    Final Progress:
+                    {{ goal.current_progress }}
+                    /
+                    {{ goal.target_value }}
+                    {{ goal.unit }}
+
+                    <br>
+
+                    Percentage:
+                    {{ goal.progress_percent }}%
+
+                    {% if goal.completed_at %}
+                        <br>
+                        Completed:
+                        {{ goal.completed_at }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            No goals have been completed yet.
+        </p>
+    {% endif %}
+{% endblock %}
