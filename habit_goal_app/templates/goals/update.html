@@ -1,0 +1,114 @@
+{% extends "base.html" %} {% block title %} Edit Goal | Habits and Goals {%
+endblock %} {% block content %}
+
+<h2>Edit Goal</h2>
+
+<form method="post">
+  <p>
+    <label for="name">Goal Name</label>
+    <br />
+    <input
+      type="text"
+      id="name"
+      name="name"
+      required
+      maxlength="80"
+      value="{{ goal.name }}"
+    />
+  </p>
+
+  <p>
+    <label for="description">Description</label>
+    <br />
+    <textarea id="description" name="description" rows="4">
+{{ goal.description }}</textarea
+    >
+  </p>
+
+  <p>
+    <label for="category_id">Category</label>
+    <br />
+    <select id="category_id" name="category_id" required>
+      {% for category in categories %}
+      <option
+        value="{{ category.id }}"
+        {%
+        if
+        category.id=""
+        ="goal.category_id"
+        %}
+        selected
+        {%
+        endif
+        %}
+      >
+        {{ category.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label>
+      <input
+        type="checkbox"
+        name="is_high_priority"
+        {%
+        if
+        goal.is_high_priority
+        %}
+        checked
+        {%
+        endif
+        %}
+      />High Priority</label
+    >
+  </p>
+
+  <p>
+    <label for="deadline">Deadline Optional</label>
+    <br />
+    <input
+      type="date"
+      id="deadline"
+      name="deadline"
+      value="{{ goal.deadline if goal.deadline else ''}}"
+    />
+  </p>
+
+  <p>
+    <label for="target_value">Target value</label>
+    <br />
+    <input
+      type="number"
+      id="target_value"
+      name="target_value"
+      required
+      min="0.01"
+      step="0.01"
+      value="{{ goal.target_value }}"
+    />
+  </p>
+
+  <p>
+    <label for="unit">Unit</label>
+    <br />
+    <input
+      type="text"
+      id="unit"
+      name="unit"
+      required
+      maxlength="20"
+      value="{{ goal.unit }}"
+    />
+  </p>
+
+  <button type="submit">Save Changes</button>
+</form>
+
+<p>
+  <a href="{{ url_for('goals.details', goal_id=goal.id) }}">
+    Back to Goal Details
+  </a>
+</p>
+{% endblock %}
