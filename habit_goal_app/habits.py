@@ -109,6 +109,63 @@ def get_period_dates(frequency, selected_date=None):
     return period_start, period_end
 
 
+def get_previous_period_start(frequency, period_start):
+    """Return the previous tracking period start date."""
+
+    if frequency == "daily":
+        return period_start - timedelta(days=1)
+
+    if frequency == "weekly":
+        return period_start - timedelta(days=7)
+
+    if frequency == "monthly":
+        if period_start.month == 1:
+            return period_start.replace(
+                year=period_start.year - 1,
+                month=12,
+                day=1,
+            )
+
+        return period_start.replace(
+            month=period_start.month - 1,
+            day=1,
+        )
+    raise ValueError("Invalid frequency.")
+
+
+def get_next_period_start(frequency, period_start):
+    """Return the next tracking period start date."""
+
+    if frequency == "daily":
+        return period_start + timedelta(days=1)
+
+    if frequency == "weekly":
+        return period_start + timedelta(days=7)
+
+    if frequency == "monthly":
+        if period_start.month == 12:
+            return period_start.replace(
+                year=period_start.year + 1,
+                month=1,
+                day=1,
+            )
+
+        return period_start.replace(
+            month=period_start.month + 1,
+            day=1,
+        )
+    raise ValueError("Invalid frequency.")
+
+
+def parse_date_value(value):
+    """Convert a database date value into a Python date."""
+
+    if isinstance(value, date):
+        return value
+
+    return date.fromisoformat(str(value))
+
+
 @bp.route("/")
 @login_required
 def index():
