@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit Habit | Habits and Goals
+{% endblock %}
+
+{% block content %}
+    <h2>Edit Habit</h2>
+    <form method="post">
+        <p>
+            <label for="name">Habit Name</label>
+            <br>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                maxlength="80"
+                value="{{ habit.name }}">
+        </p>
+
+        <p>
+            <label for="description">Description</label>
+            <br>
+            <textarea
+                id="description"
+                name="description"
+                rows="4"
+            >{{ habit.description }}</textarea>
+        </p>
+
+        <p>
+            <label for="category_id">Category</label>
+            <br>
+            <select
+                id="category_id"
+                name="category_id"
+                required>
+                {% for category in categories %}
+                    <option
+                        value="{{ category.id }}"
+                        {% if category.id == habit.category_id %}
+                            selected
+                        {% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label for="frequency">Frequency</label>
+            <br>
+            <select
+                id="frequency"
+                name="frequency"
+                required>
+                <option
+                    value="daily"
+                    {% if habit.frequency == "daily" %}
+                        selected
+                    {% endif %}>
+                    Daily
+                </option>
+
+                <option
+                    value="weekly"
+                    {% if habit.frequency == "weekly" %}
+                        selected
+                    {% endif %}>
+                    Weekly
+                </option>
+
+                <option
+                    value="monthly"
+                    {% if habit.frequency == "monthly" %}
+                        selected
+                    {% endif %}>
+                    Monthly
+                </option>
+            </select>
+        </p>
+
+        <p>
+            <label for="target_amount">Target Amount</label>
+            <br>
+            <input
+                type="number"
+                id="target_amount"
+                name="target_amount"
+                required
+                min="0.01"
+                step="0.01"
+                value="{{ habit.target_amount }}">
+        </p>
+
+        <p>
+            <label for="unit">Unit</label>
+            <br>
+            <input
+                type="text"
+                id="unit"
+                name="unit"
+                required
+                maxlength="20"
+                value="{{ habit.unit }}">
+        </p>
+
+        <p>
+            <label>
+                <input
+                    type="checkbox"
+                    name="is_active"
+                    {% if habit.is_active %}
+                        checked
+                    {% endif %}>
+                Active Habit
+            </label>
+        </p>
+
+        <button type="submit">
+            Save Changes
+        </button>
+    </form>
+
+    <p>
+        <a href="{{ url_for('habits.details', habit_id=habit.id) }}">
+            Back to Habit Details
+        </a>
+    </p>
+{% endblock %}

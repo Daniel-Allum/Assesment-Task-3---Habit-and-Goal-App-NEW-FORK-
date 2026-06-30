@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Habit History | Habits and Goals
+{% endblock %}
+
+{% block content %}
+    <h2>{{ habit.name }} History</h2>
+
+    <p>
+        This page displays all recorded tracking periods for this habit.
+    </p>
+
+    {% if entries %}
+        <ul>
+            {% for entry in entries %}
+                <li>
+                    <strong>
+                        {{ entry.period_start }}
+                        to
+                        {{ entry.period_end }}
+                    </strong>
+
+                    <br>
+
+                    Progress:
+                    {{ entry.amount_completed }}
+                    /
+                    {{ habit.target_amount }}
+                    {{ habit.unit }}
+
+                    <br>
+
+                    Status:
+                    {% if entry.is_completed %}
+                        Completed
+                    {% else %}
+                        Incomplete
+                    {% endif %}
+
+                    <br>
+
+                    Last updated:
+                    {{ entry.updated_at }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            No history has been recorded for this habit yet.
+        </p>
+    {% endif %}
+
+    <p>
+        <a href="{{ url_for('habits.details', habit_id=habit.id) }}">
+            Back to Habit Details
+        </a>
+        |
+        <a href="{{ url_for('habits.index') }}">
+            Back to Habits
+        </a>
+    </p>
+{% endblock %}

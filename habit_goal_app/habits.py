@@ -26,11 +26,14 @@ def get_user_categories():
     return (
         get_db()
         .execute(
-            (
-                "SELECT id, name FROM categories"
-                "Where user_id = ?"
-                "ORDER BY name COLLATE NOCASE"
-            ),
+            """
+        SELECT
+            id,
+            name
+        FROM categories
+        WHERE user_id = ?
+        ORDER BY name COLLATE NOCASE
+        """,
             (g.user["id"],),
         )
         .fetchall()
