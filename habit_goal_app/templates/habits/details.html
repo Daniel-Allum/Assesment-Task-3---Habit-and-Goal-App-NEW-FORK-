@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ habit.name }} | Habits and Goals
+{% endblock %}
+
+{% block content %}
+    <h2>{{ habit.name }}</h2>
+
+    <p>
+        <strong>Category:</strong>
+        {{ habit.category_name if habit.category_name else "No category" }}
+    </p>
+
+    <p>
+        <strong>Description:</strong>
+        {{ habit.description if habit.description else "No description provided." }}
+    </p>
+
+    <p>
+        <strong>Frequency:</strong>
+        {{ habit.frequency }}
+    </p>
+
+    <p>
+        <strong>Target:</strong>
+        {{ habit.target_amount }}
+        {{ habit.unit }}
+    </p>
+
+    <p>
+        <strong>Current streak:</strong>
+        {{ habit.current_streak}}
+    </p>
+
+    <p>
+        <Strong>Longest streak:</Strong>
+        {{ habit.longest_streak }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {% if habit.is_active %}
+            Active
+        {% else %}
+            Inactive
+        {% endif %}
+    </p>
+
+
+
+    <h3>Current Tracking Period</h3>
+    <p>
+        <strong>Period:</strong>
+        {{ current_entry.period_start }}
+        to
+        {{ current_entry.period_end }}
+    </p>
+
+    <p>
+        <strong>Amount completed:</strong>
+        {{ current_entry.amount_completed }}
+        /
+        {{ habit.target_amount }}
+        {{ habit.unit }}
+    </p>
+
+    <p>
+        <strong>Percentage:</strong>
+        {{ progress_percent }}%
+    </p>
+
+    <p>
+        <strong>Completed this period:</strong>
+        {% if current_entry.is_completed %}
+            Yes
+        {% else %}
+            No
+        {% endif %}
+    </p>
+
+
+
+    {% if habit.is_active %}
+        <h3>Record Progress</h3>
+        <form
+            action="{{ url_for('habits.record', habit_id=habit.id) }}"
+            method="post">
+            <p>
+                <label for="amount_completed">
+                    Amount completed this period
+                </label>
+                <br>
+                <input
+                    type="number"
+                    id="amount_completed"
+                    name="amount_completed"
+                    required
+                    min="0"
+                    step="0.01"
+                    value="{{ current_entry.amount_completed }}">
+            </p>
+
+            <button type="submit">
+                Save Habit Progress
+            </button>
+        </form>
+    {% endif %}
+
+    <h3>Recent History</h3>
+
+    {% if recent_entries %}
+        <ul>
+            {% for entry in recent_entries %}
+                <li>
+                    {{ entry.period_start }}
+                    to
+                    {{ entry.period_end }}:
+
+                    {{ entry.amount_completed }}
+                    /
+                    {{ habit.target_amount }}
+                    {{ habit.unit }}
+
+                    {% if entry.is_completed %}
+                        - Completed
+                    {% else %}
+                        - Incomplete
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            No habit entries have been recorded yet.
+        </p>
+    {% endif %}
+
+
+
+    <h3>Actions</h3>
+    <p>
+        <a href="{{ url_for('habits.update', habit_id=habit.id) }}">
+            Edit Habit
+        </a>
+        |
+        <a href="{{ url_for('habits.history', habit_id=habit.id) }}">
+            Full History
+        </a>
+    </p>
+
+    <form
+        action="{{ url_for('habits.delete', habit_id=habit.id) }}"
+        method="post">
+        <button type="submit">
+            Delete Habit
+        </button>
+    </form>
+
+    <p>
+        <a href="{{ url_for('habits.index') }}">
+            Back to Habits
+        </a>
+    </p>
+{% endblock %}
