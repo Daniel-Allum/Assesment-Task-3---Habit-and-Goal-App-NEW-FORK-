@@ -1,29 +1,33 @@
 {% extends "base.html" %} {% block title %} Habits | Habits and Goals {%
 endblock %} {% block content %}
-<h2>Habits</h2>
+  <h2>Active Habits</h2>
 
-<p>
-  This page allows users to create habits and enter completed amounts and track
-  streaks.
-</p>
+  <p>
+    Habits are a tool that can be entered allowing you to keep track of what you need to do,
+    this can either be daily, weekly or even monthly.
+  </p>
 
-{% if habits %}
-<ul>
-  {% for habit in habits %}
+  <p>
+    <a href="{{ url_for('habits.create') }}">Create New Habit</a>
+  </p>
+
+  {% if habits %}
+  <ul>
+    {% for habit in habits %}
   <li>
-    <strong>{{ habit["name"] }}</strong>
+    <strong> <a href="{{ url_for('habits.details', habit_id=habit.id) }}">
+    {{ habit["name"] }} </a> </strong>
 
     <br />
-    Category: {{ habit["category_name"] if habit["category_name"] else "No
-    category" }}
+    Category: {{ habit.category_name if habit.category_name else "No category" }}
     <br />
-    Frequency: {{ habit["frequency"] }}
+    Frequency: {{ habit.frequency }}
     <br />
-    Target: {{ habit["target_amount"] }} {{ habit["unit"] }}
+    Target: {{ habit.target_amount }} {{ habit.unit }}
     <br />
-    Current streak: {{ habit["current_streak"] }}
+    Current streak: {{ habit.current_streak }}
     <br />
-    Longest streak: {{ habit["longest_streak"] }}
+    Longest streak: {{ habit.longest_streak }}
   </li>
   {% endfor %}
 </ul>
